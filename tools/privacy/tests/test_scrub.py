@@ -78,6 +78,23 @@ class ScrubTests(Base):
         t = "A perfectly ordinary sentence about gardens."
         self.assertEqual(self.s(t), t)
 
+    def test_handles_and_emails(self):
+        out = self.s("cc @clientchan, @Clientchan and @other; @airgum @commintator_bot ok; "
+                     "write a@b.example, A@B.example and me@goumar.eu")
+        self.assertEqual(out.count("[handle A]"), 2)
+        self.assertIn("[handle B]", out)
+        self.assertIn("@airgum @commintator_bot", out)
+        self.assertEqual(out.count("[email A]"), 2)
+        self.assertIn("me@goumar.eu", out)
+        self.assertNotIn("clientchan", out.lower())
+        self.assertNotIn("b.example", out)
+
+    def test_handle_wins_over_name_inside_it(self):
+        self.assertEqual(self.s("@zebrov_fan"), "[handle A]")
+
+    def test_variants_scrubbed(self):
+        self.assertIn("[name", self.s("Zebbrovs"))
+
     def test_scrubbed_output_passes_the_hook(self):
         raw = "Zebrov wrote from t.me/somechan about Plumbo Industries, see https://example.com/q"
         out = self.e.run("scrub.py", stdin=raw).stdout

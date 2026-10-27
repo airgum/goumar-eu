@@ -22,7 +22,7 @@ a placeholder that matches nothing).
 ## Tools
 
 - `normalize.py` - the one shared normaliser: NFKC, lowercase, Cyrillic to Latin (one table),
-  accents removed, Russian/Spanish endings stripped (suffix list in the file), split on any
+  accents removed, transliteration variants folded (`shch/sch>sh zh>j kh>h ts/tz>c ya/ia>a yu/iu>u y>i`, repeated letters collapsed), Russian/Spanish endings stripped (suffix list in the file), split on any
   non-alphanumeric character, n-grams of 1-3 tokens.
 - `hashlist.py build --salt-file S --out OUT [--proof P] [--merge-into OLD] < names.txt` -
   hashes every n-gram with `sha256(salt + normalised)`. Single words that are in the en/ru/es
@@ -30,14 +30,14 @@ a placeholder that matches nothing).
   matches an entry of the proof set (raw names or 64-hex hashes) stops the build (exit 3).
   The list only grows (`--merge-into`). Output is counts only. A canary entry is always added.
 - `scrub.py [FILE]` - replaces names, `t.me/*` channels, foreign URL hosts and denylisted phrases
-  with `[name A]`, `[channel A]`, `[site A]`, `[removed]`. Own addresses stay (goumar.eu,
+  with `[name A]`, `[handle A]` (every handle that starts with `@`, except @airgum, @commintator, @commintator_bot, @commintator.app), `[email A]` (any address but me@goumar.eu), `[channel A]`, `[site A]`, `[removed]`. Own addresses stay (goumar.eu,
   commintator.goumar.eu, github.com/airgum, t.me/airgum, instagram.com/commintator.app).
   Canary check first.
 - `hook.py PATH... | --staged | --pushed | --print-version` - scans .md/.json/.txt, HTML
   (visible text, alt/title/meta only) and PDF (needs `pdftotext`). Prints
   `file<TAB>byte offset<TAB>rule id`, never the matched text; a banned word inside a file name
   is shown as `<redacted-path:...>`. Rule ids: `deny-phrase`, `hash-name`, `ipv4`, `ipv6`,
-  `email`, `user-at-host`, `abs-path`, `host-port`, `secret-key`, `phone`. Exit 1 on findings.
+  `email`, `at-handle` (npm `@scope/pkg` is not a handle), `user-at-host`, `abs-path`, `host-port`, `secret-key`, `phone`. Exit 1 on findings.
 
 ## Git hooks
 

@@ -72,10 +72,24 @@ def name_hits(tokens: List[normalize.Token], hashes, salt: bytes) -> List[Hit]:
 _IPV4 = re.compile(r"(?<![\w.])(?:\d{1,3}\.){3}\d{1,3}(?![\w]|\.\d)")
 _IPV6 = re.compile(r"(?<![\w:])[0-9A-Fa-f:]{3,}(?![\w:])")
 _AT = re.compile(r"(?<![\w.+-])[A-Za-z0-9._+-]+@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)*")
+_HANDLE = re.compile(r"(?<![\w.+\-])@([A-Za-z0-9_]{3,})(?![A-Za-z0-9_]|/)")  # "@scope/pkg" is not a handle
+ALLOWED_HANDLES = {"airgum", "commintator", "commintator_bot"}  # "@commintator.app" is in WHITELIST
 _PATH = re.compile(r"(?<![\w.\-/])/(?:Users|etc|opt|var|home)(?![A-Za-z0-9_])")
 _HOSTPORT = re.compile(r"(?<![\w.\-])[A-Za-z0-9](?:[A-Za-z0-9.\-]*[A-Za-z0-9])?:(\d{2,5})(?![\w])")
 _KEY = re.compile(r"(?<![\w])(?:sk-[A-Za-z0-9_\-]{16,}|gh[pousr]_[A-Za-z0-9]{20,})")
 _PHONE_RUN = re.compile(r"\+?\d(?:[\d\s().\-]*\d)?")
+
+
+def at_handles(masked: str):
+    """(start, end, lowercase handle) of every non-allowlisted @handle outside emails."""
+    return [(m.start(), m.end(), m.group(1).lower()) for m in _HANDLE.finditer(masked)
+            if m.group(1).lower() not in ALLOWED_HANDLES]
+
+
+def emails(masked: str):
+    """(start, end, lowercase address) of every address with a dotted domain."""
+    return [(m.start(), m.end(), m.group().lower()) for m in _AT.finditer(masked)
+            if "." in m.group().split("@", 1)[1]]
 
 
 def _pattern_hits(text: str, phones: List[str]) -> List[Hit]:
@@ -94,6 +108,8 @@ def _pattern_hits(text: str, phones: List[str]) -> List[Hit]:
     for m in _AT.finditer(text):
         domain = m.group().split("@", 1)[1]
         hits.append((m.start(), m.end(), "email" if "." in domain else "user-at-host"))
+    for m in at_handles(text):
+        hits.append((m[0], m[1], "at-handle"))
     for m in _PATH.finditer(text):
         hits.append((m.start(), m.end(), "abs-path"))
     for m in _HOSTPORT.finditer(text):

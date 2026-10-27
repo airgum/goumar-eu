@@ -104,6 +104,17 @@ class RuleTests(Base):
         p = env.write("a.md", "airgumx and airgum")
         self.assertEqual(rules(env.run("hook.py", [str(p)]).stdout), ["hash-name"])
 
+    def test_at_handle(self):
+        self.assertRule("ping @clientchan please", "at-handle")
+        self.assertRule("ping @Client_Chan2", "at-handle")
+        self.assertClean("by @airgum, @AIRGUM, @commintator, @commintator_bot, @commintator.app, me@goumar.eu")
+        self.assertClean("npm @scope/pkg and @ab and mail-free text")
+        self.assertRule("mail zz@example.org", "email")
+        self.assertEqual(rules(self.scan("mail zz@example.org").stdout), ["email"])  # not also a handle
+
+    def test_variant_folding_in_hook(self):
+        self.assertRule("hello Tzebrov and Zebbrovs", "hash-name")
+
     def test_offset_is_byte_offset(self):
         p = self.e.write("a.md", "ёё 10.20.30.40")
         r = self.e.run("hook.py", [str(p)])

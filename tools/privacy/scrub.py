@@ -2,7 +2,7 @@
 
   scrub.py [FILE] > cleaned.txt      (reads stdin when FILE is omitted)
 
-Placeholders: [name A], [handle A], [email A], [channel A], [site A], [removed]; the same normalised
+Placeholders: [name A], [handle A], [email A], [ip A], [host A], [path A], [phone A], [channel A], [site A], [removed]; the same normalised
 subject gets the same letter within one run. Runs the canary check first and
 stops (exit 2) when it fails, when any secret input is missing, or when the
 list version does not match denylist.version. The list version is printed to
@@ -72,6 +72,14 @@ def scrub_text(text: str, lists: config.Lists) -> str:
     spans: List[Span] = _url_spans(text)
     spans += [(s, e, "handle", k) for s, e, k in detect.at_handles(masked)]
     spans += [(s, e, "email", k) for s, e, k in detect.emails(masked)]
+    for s, e, _, k in detect.phone_spans(masked, lists.phones):
+        spans.append((s, e, "phone", k))
+    for s, e, rule, k in detect.ip_spans(masked):
+        spans.append((s, e, "ip", k))
+    for s, e, _, k in detect.host_port_spans(masked):
+        spans.append((s, e, "host", k))
+    for s, e, _, k in detect.path_spans(masked):
+        spans.append((s, e, "path", k))
     for s, e, _ in detect.phrase_hits(tokens, detect.PhraseIndex(lists.phrases)):
         spans.append((s, e, "removed", ""))
     for key, i, j in normalize.ngrams(tokens):
@@ -86,7 +94,7 @@ def scrub_text(text: str, lists: config.Lists) -> str:
         if sp[0] >= last_end:
             chosen.append(sp)
             last_end = sp[1]
-    letters = {"name": {}, "channel": {}, "site": {}, "handle": {}, "email": {}}
+    letters = {"name": {}, "channel": {}, "site": {}, "handle": {}, "email": {}, "ip": {}, "host": {}, "path": {}, "phone": {}}
     out, pos = [], 0
     for s, e, kind, key in chosen:
         out.append(text[pos:s])

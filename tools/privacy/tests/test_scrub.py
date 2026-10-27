@@ -95,6 +95,26 @@ class ScrubTests(Base):
     def test_variants_scrubbed(self):
         self.assertIn("[name", self.s("Zebbrovs"))
 
+    def test_server_details(self):
+        out = self.s("db dbhost:5432 at 10.20.30.40 and 2001:db8::1, logs in /var/log/app.log and /Users/x/y.txt "
+                     "again dbhost:5432 ok")
+        self.assertEqual(out.count("[host A]"), 2)
+        self.assertIn("[ip A]", out)
+        self.assertIn("[ip B]", out)
+        self.assertEqual(out.count("[path"), 2)
+        self.assertNotIn("/log", out)
+        self.assertNotIn("y.txt", out)
+
+    def test_mixed_sample_passes_hook_with_zero_findings(self):
+        raw = ("Zebrov (@clientchan, zz@example.org) wrote from t.me/somechan about Plumbo Industries, "
+               "see https://example.com/q. Server dbhost:5432 / api.internal.net:8080/x at 10.20.30.40 and "
+               "2001:db8::1; files /Users/x/a.txt, /etc/hosts, /opt/app, /var/log, /home/me. "
+               "Call %s. Quorvex Lumina Sur and Зеброва too. Granada, Spain stays." % "+34 600 111 222")
+        out = self.e.run("scrub.py", stdin=raw).stdout
+        p = self.e.write("mixed.md", out)
+        r = self.e.run("hook.py", [str(p)])
+        self.assertEqual((r.returncode, r.stdout), (0, ""), out)
+
     def test_scrubbed_output_passes_the_hook(self):
         raw = "Zebrov wrote from t.me/somechan about Plumbo Industries, see https://example.com/q"
         out = self.e.run("scrub.py", stdin=raw).stdout

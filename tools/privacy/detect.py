@@ -92,11 +92,14 @@ def emails(masked: str):
             if "." in m.group().split("@", 1)[1]]
 
 
-def _pattern_hits(text: str, phones: List[str]) -> List[Hit]:
-    hits: List[Hit] = []
+_PATH_TAIL = re.compile(r"[^\s\"'<>)\]]*")
+
+
+def ip_spans(text: str):
+    out = []
     for m in _IPV4.finditer(text):
         if all(int(p) <= 255 for p in m.group().split(".")):
-            hits.append((m.start(), m.end(), "ipv4"))
+            out.append((m.start(), m.end(), "ipv4", m.group()))
     for m in _IPV6.finditer(text):
         s = m.group()
         if s.count(":") >= 2:
@@ -104,30 +107,52 @@ def _pattern_hits(text: str, phones: List[str]) -> List[Hit]:
                 ipaddress.IPv6Address(s)
             except ValueError:
                 continue
-            hits.append((m.start(), m.end(), "ipv6"))
+            out.append((m.start(), m.end(), "ipv6", s.lower()))
+    return out
+
+
+def host_port_spans(text: str):
+    out = []
+    for m in _HOSTPORT.finditer(text):
+        host = m.group()[: m.group().rindex(":")]
+        if any(c.isalpha() or c == "." for c in host) and int(m.group(1)) <= 65535:
+            out.append((m.start(), m.end(), "host-port", m.group().lower()))
+    return out
+
+
+def path_spans(text: str):
+    """Filesystem-root paths; the span covers the whole path, not just the root."""
+    return [(m.start(), _PATH_TAIL.match(text, m.end()).end(), "abs-path", m.group())
+            for m in _PATH.finditer(text)]
+
+
+def phone_spans(text: str, phones: List[str]):
+    variants = set()
+    for d in phones:
+        variants.add(d)
+        if len(d) >= 10:
+            variants.add(d[-9:])
+    out = []
+    for m in _PHONE_RUN.finditer(text) if variants else []:
+        digits = re.sub(r"\D", "", m.group())
+        if any(v in digits for v in variants):
+            out.append((m.start(), m.end(), "phone", digits))
+    return out
+
+
+def _pattern_hits(text: str, phones: List[str]) -> List[Hit]:
+    hits: List[Hit] = []
+    for s, e, rule, _ in ip_spans(text) + host_port_spans(text) + path_spans(text):
+        hits.append((s, e, rule))
     for m in _AT.finditer(text):
         domain = m.group().split("@", 1)[1]
         hits.append((m.start(), m.end(), "email" if "." in domain else "user-at-host"))
     for m in at_handles(text):
         hits.append((m[0], m[1], "at-handle"))
-    for m in _PATH.finditer(text):
-        hits.append((m.start(), m.end(), "abs-path"))
-    for m in _HOSTPORT.finditer(text):
-        host = m.group()[: m.group().rindex(":")]
-        if any(c.isalpha() or c == "." for c in host) and int(m.group(1)) <= 65535:
-            hits.append((m.start(), m.end(), "host-port"))
     for m in _KEY.finditer(text):
         hits.append((m.start(), m.end(), "secret-key"))
-    if phones:
-        variants = set()
-        for d in phones:
-            variants.add(d)
-            if len(d) >= 10:
-                variants.add(d[-9:])
-        for m in _PHONE_RUN.finditer(text):
-            digits = re.sub(r"\D", "", m.group())
-            if any(v in digits for v in variants):
-                hits.append((m.start(), m.end(), "phone"))
+    for s, e, rule, _ in phone_spans(text, phones):
+        hits.append((s, e, rule))
     return hits
 
 

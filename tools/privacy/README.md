@@ -30,7 +30,7 @@ a placeholder that matches nothing).
   matches an entry of the proof set (raw names or 64-hex hashes) stops the build (exit 3).
   The list only grows (`--merge-into`). Output is counts only. A canary entry is always added.
 - `scrub.py [FILE]` - replaces names, `t.me/*` channels, foreign URL hosts and denylisted phrases
-  with `[name A]`, `[handle A]` (every handle that starts with `@`, except @airgum, @commintator, @commintator_bot, @commintator.app), `[email A]` (any address but me@goumar.eu), `[channel A]`, `[site A]`, `[removed]`. Own addresses stay (goumar.eu,
+  with `[name A]`, `[handle A]` (every handle that starts with `@`, except @airgum, @commintator, @commintator_bot, @commintator.app), `[email A]` (any address but me@goumar.eu), `[ip A]`, `[host A]` (host:port), `[path A]` (filesystem-root paths), `[phone A]`, `[channel A]`, `[site A]`, `[removed]`. Own addresses stay (goumar.eu,
   commintator.goumar.eu, github.com/airgum, t.me/airgum, instagram.com/commintator.app).
   Canary check first.
 - `hook.py PATH... | --staged | --pushed | --print-version` - scans .md/.json/.txt, HTML

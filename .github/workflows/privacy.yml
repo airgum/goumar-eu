@@ -1,0 +1,29 @@
+name: privacy
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    env:
+      GOUMAR_DENYLIST: ${{ secrets.GOUMAR_DENYLIST }}
+      GOUMAR_SALT: ${{ secrets.GOUMAR_SALT }}
+      GOUMAR_NAMES_HASHES_1: ${{ secrets.GOUMAR_NAMES_HASHES_1 }}
+      GOUMAR_NAMES_HASHES_2: ${{ secrets.GOUMAR_NAMES_HASHES_2 }}
+      GOUMAR_NAMES_HASHES_3: ${{ secrets.GOUMAR_NAMES_HASHES_3 }}
+      GOUMAR_NAMES_HASHES_4: ${{ secrets.GOUMAR_NAMES_HASHES_4 }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install poppler (PDF text)
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq poppler-utils
+      - name: Install test dependency
+        run: python -m pip install -r tools/privacy/requirements.txt
+      - name: Unit tests
+        run: python -m unittest discover -s tools/privacy/tests
+      - name: Scan repository
+        run: python tools/privacy/hook.py .

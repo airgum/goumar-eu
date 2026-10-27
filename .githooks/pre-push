@@ -1,0 +1,4 @@
+#!/bin/sh
+# Scans every commit about to be pushed (messages and file contents).
+root="$(git rev-parse --show-toplevel)"
+exec python3 "$root/tools/privacy/hook.py" --pushed

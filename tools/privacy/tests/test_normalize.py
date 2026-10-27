@@ -25,6 +25,25 @@ class NormalizeTests(unittest.TestCase):
         for form in ("Зеброва", "Зебровым", "Зебровой", "Зебровы", "Зебровых", "Зебровe", "Зебровu"):
             self.assertEqual(n.normalize(form), base, form)
 
+    def test_variant_folding(self):
+        groups = [("Жебров", "Zhebrov", "Jebrov"), ("Хебров", "Khebrov", "Hebrov"),
+                  ("Цебров", "Tsebrov", "Cebrov", "Tzebrov"),
+                  ("Щебров", "Shchebrov", "Schebrov", "Shebrov"),
+                  ("Юбров", "Yubrov", "Iubrov", "Ubrov"), ("Ябров", "Yabrov", "Iabrov", "Abrov"),
+                  ("Сергей", "Sergey", "Sergei"), ("Зебров", "Zebbrov", "Zebrov")]
+        for g in groups:
+            self.assertEqual(len({n.normalize(x) for x in g}), 1, g)
+
+    def test_folding_keeps_endings_consistent(self):
+        self.assertEqual(n.normalize("Жебровым"), n.normalize("Jebrov"))
+        self.assertEqual(n.normalize("Сергея"), n.normalize("Sergey"))
+
+    def test_fold_table(self):
+        self.assertEqual(n.fold("shch"), "sh")
+        self.assertEqual(n.fold("zh"), "j")
+        self.assertEqual(n.fold("ff"), "f")
+        self.assertEqual(n.fold("ya"), "a")
+
     def test_spanish_plural(self):
         self.assertEqual(n.normalize("Zebrovs"), n.normalize("Zebrov"))
 

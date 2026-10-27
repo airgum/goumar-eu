@@ -2,6 +2,7 @@ import unittest
 
 from support import Base, Env, SALT
 import config
+import normalize
 import hashlist
 
 try:
@@ -33,7 +34,7 @@ class HashlistTests(Base):
     def test_multiword_kept_while_unigrams_dropped(self):
         h, counts = hashlist.build_hashes(["Job Spy"], SALT)
         self.assertEqual(counts["dropped_dictionary"], 2)
-        self.assertIn(config.hash_key(SALT, "job spy"), h)
+        self.assertIn(config.hash_key(SALT, normalize.normalize("Job Spy")), h)
 
     def test_proof_set_stop(self):
         with self.assertRaises(hashlist.ProofError):
@@ -45,7 +46,7 @@ class HashlistTests(Base):
         self.assertNotIn("fix", r.stdout + r.stderr.replace("hashlist: STOP", ""))
 
     def test_proof_set_accepts_hashes(self):
-        h = config.hash_key(SALT, "fix")
+        h = config.hash_key(SALT, normalize.normalize("fix"))
         with self.assertRaises(hashlist.ProofError):
             hashlist.build_hashes(["fix"], SALT, proof=[h])
 
@@ -61,8 +62,8 @@ class HashlistTests(Base):
                                         "--merge-into", str(first)], stdin="Quorvex\n")
         self.assertEqual(r2.returncode, 0)
         merged = first.read_text().split()
-        self.assertIn(config.hash_key(SALT, "zebr"), merged)
-        self.assertIn(config.hash_key(SALT, "quorvex"), merged)
+        self.assertIn(config.hash_key(SALT, normalize.normalize("Zebrov")), merged)
+        self.assertIn(config.hash_key(SALT, normalize.normalize("Quorvex")), merged)
         self.assertEqual(len(merged), 3)  # zebr, quorvex, canary
 
     def test_merge_into_missing_file_fails(self):

@@ -7,8 +7,15 @@ Pipeline per token:
   2. NFKC + lowercase;
   3. Cyrillic -> Latin with ONE fixed table (TRANSLIT), then accents removed
      (NFKD, combining marks dropped, so "n with tilde" becomes "n");
-  4. inflectional endings stripped (SUFFIXES, longest first, repeated until
+  4. transliteration variants folded (fold(), table FOLD below) so that
+     "Zhebrov", "Jebrov" and "Жебров" are one name;
+  5. inflectional endings stripped (SUFFIXES, longest first, repeated until
      nothing changes, never shortening the stem below MIN_STEM letters).
+
+FOLD, applied in this order to the transliterated word:
+  shch, sch -> sh | zh -> j | kh -> h | ts, tz -> c | ya, ia -> a |
+  yu, iu -> u | y -> i | any repeated letter -> one letter ("ff" -> "f").
+The suffix list is folded with the same function, so stripping stays consistent.
 
 N-grams are 1..MAX_NGRAM consecutive stems joined with one space.
 """
@@ -26,7 +33,7 @@ _TOKEN_RE = re.compile(r"[^\W_]+", re.UNICODE)
 # One fixed Cyrillic -> Latin table (lowercase input only).
 TRANSLIT = {
     "а": "a", "б": "b", "в": "v", "г": "g", "д": "d", "е": "e", "ё": "e",
-    "ж": "zh", "з": "z", "и": "i", "й": "j", "к": "k", "л": "l", "м": "m",
+    "ж": "zh", "з": "z", "и": "i", "й": "i", "к": "k", "л": "l", "м": "m",
     "н": "n", "о": "o", "п": "p", "р": "r", "с": "s", "т": "t", "у": "u",
     "ф": "f", "х": "kh", "ц": "ts", "ч": "ch", "ш": "sh", "щ": "shch",
     "ъ": "", "ы": "y", "ь": "", "э": "e", "ю": "yu", "я": "ya",
@@ -37,13 +44,12 @@ TRANSLIT = {
 # Russian (case/number/gender endings of surnames and nouns, transliterated):
 _RU = [
     "a", "y", "i", "u", "e", "o", "ya", "yu", "ov", "ev", "om", "em", "am",
-    "ym", "im", "oj", "ej", "aj", "ij", "ami", "yami", "ymi", "imi", "ogo",
+    "ym", "im", "oi", "ei", "ai", "ii", "ami", "yami", "ymi", "imi", "ogo",
     "ego", "omu", "emu", "akh", "ykh", "ikh", "yakh", "yam", "oyu", "eyu",
-    "aya", "yaya", "uyu", "oe", "ee", "yj",
+    "aya", "yaya", "uyu", "oe", "ee", "yi",
 ]
 # Spanish plurals/gender (the vowels are already in the list above):
 _ES = ["s", "es", "os", "as"]
-SUFFIXES = sorted(set(_RU + _ES), key=lambda s: (-len(s), s))
 
 
 class Token(NamedTuple):
@@ -52,6 +58,20 @@ class Token(NamedTuple):
     lower: str      # NFKC + lowercase, original script (used for dictionary check)
     translit: str   # transliterated, no accents
     stem: str       # translit with endings stripped (the hashed form)
+
+
+_FOLD = [("shch", "sh"), ("sch", "sh"), ("zh", "j"), ("kh", "h"), ("ts", "c"), ("tz", "c"),
+         ("ya", "a"), ("ia", "a"), ("yu", "u"), ("iu", "u"), ("y", "i")]
+_REPEAT = re.compile(r"(.)\1+")
+
+
+def fold(word: str) -> str:
+    for a, b in _FOLD:
+        word = word.replace(a, b)
+    return _REPEAT.sub(r"\1", word)
+
+
+SUFFIXES = sorted({fold(x) for x in _RU + _ES}, key=lambda x: (-len(x), x))
 
 
 def transliterate(s: str) -> str:
@@ -80,7 +100,7 @@ def tokenize(text: str) -> List[Token]:
         lower = "".join(ch for ch in lower if ch.isalnum())
         if not lower:
             continue
-        tr = transliterate(lower)
+        tr = fold(transliterate(lower))
         if not tr:
             continue
         tokens.append(Token(m.start(), m.end(), lower, tr, stem(tr)))

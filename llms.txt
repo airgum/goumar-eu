@@ -1,6 +1,6 @@
 # Goumar Zainoulline
 
-> AI Product Builder. Goumar Zainoulline automates what costs people hours and days online. Right now he is building comm:ntator, a service that analyses the news.
+> AI Product Builder. Goumar Zainoulline automates what costs people hours and days online. Right now he is building Commintator, a service that analyses the news.
 
 ## Pages
 

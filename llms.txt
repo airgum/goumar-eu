@@ -1,0 +1,15 @@
+# Goumar Zainoulline
+
+> AI Product Builder. Goumar Zainoulline automates what costs people hours and days online. Right now he is building comm:ntator, a service that analyses the news.
+
+## Pages
+
+- [English](https://goumar.eu/en/): the home page in English
+- [Russian](https://goumar.eu/ru/): the home page in Russian
+- [Spanish](https://goumar.eu/es/): the home page in Spanish
+
+## Elsewhere
+
+- [LinkedIn](https://www.linkedin.com/in/goumar)
+- [GitHub](https://github.com/airgum)
+- [Telegram](https://t.me/airgum)

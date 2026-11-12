@@ -25,11 +25,7 @@
 <meta property="og:image:alt" content="Goumar Zainoulline, AI Product Builder">
 <meta name="twitter:card" content="summary_large_image">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"Person","name":"Goumar Zainoulline","alternateName":"Гумар Зайнуллин","jobTitle":"AI Product Builder","url":"https://goumar.eu/","sameAs":["https://www.linkedin.com/in/goumar","https://github.com/airgum","https://t.me/airgum"],"knowsLanguage":["ru","en","es"],"alumniOf":{"@type":"CollegeOrUniversity","name":"ITMO University"},"address":{"@type":"PostalAddress","addressCountry":"ES"},"description":"Goumar Zainoulline automates what costs people hours online. Right now he is building Commintator, a service that analyses the news.","image":"https://goumar.eu/og-en.png"}</script>
-<style>html{background:#07080d;color:#eef3ff;color-scheme:dark}body{margin:0;min-height:100svh;display:flex;align-items:center;justify-content:center;font:300 1.125rem/1.5 Jost,system-ui,sans-serif}nav{display:flex;flex-wrap:wrap;gap:.25rem 1.5rem;justify-content:center;padding:1.5rem}a{color:#eef3ff;display:inline-flex;align-items:center;min-height:44px;text-underline-offset:.2em}a:focus-visible{outline:2px solid #eef3ff;outline-offset:3px}</style>
-</head>
-<body>
-<nav aria-label="Language"><a href="./ru/" hreflang="ru" lang="ru">Русский</a><a href="./en/" hreflang="en" lang="en">English</a><a href="./es/" hreflang="es" lang="es">Español</a></nav>
-<script>document.addEventListener('click',function(e){var a=e.target.closest&&e.target.closest('a[hreflang]');if(a){try{localStorage.setItem('lang',a.getAttribute('hreflang'))}catch(x){}}});</script>
+<style>html{background:#07080d;color:#eef3ff;color-scheme:dark}body{margin:0;min-height:100svh;display:flex;align-items:center;justify-content:center;font:300 1.125rem/1.5 Jost,system-ui,sans-serif}nav{display:flex;flex-wrap:wrap;gap:.25rem 1.5rem;justify-content:center;padding:1.5rem}a{color:#eef3ff;display:inline-flex;align-items:center;min-height:44px;text-underline-offset:.2em}a:focus-visible{outline:2px solid #eef3ff;outline-offset:3px}.go nav{visibility:hidden}</style>
 <script>(function(){
 var L=['ru','en','es'],pick=null,RU=['Europe/Moscow','Europe/Kaliningrad','Europe/Samara','Europe/Volgograd','Europe/Ulyanovsk','Europe/Saratov','Europe/Astrakhan','Europe/Kirov','Asia/Yekaterinburg','Asia/Omsk','Asia/Novosibirsk','Asia/Barnaul','Asia/Tomsk','Asia/Novokuznetsk','Asia/Krasnoyarsk','Asia/Irkutsk','Asia/Chita','Asia/Yakutsk','Asia/Khandyga','Asia/Vladivostok','Asia/Ust-Nera','Asia/Magadan','Asia/Sakhalin','Asia/Srednekolymsk','Asia/Kamchatka','Asia/Anadyr'],ES=['Europe/Madrid','Atlantic/Canary','Africa/Ceuta','Africa/Malabo','America/Argentina/Buenos_Aires','America/Argentina/Cordoba','America/Argentina/Salta','America/Argentina/Jujuy','America/Argentina/Tucuman','America/Argentina/Catamarca','America/Argentina/La_Rioja','America/Argentina/San_Juan','America/Argentina/Mendoza','America/Argentina/San_Luis','America/Argentina/Rio_Gallegos','America/Argentina/Ushuaia','America/Buenos_Aires','America/Cordoba','America/Rosario','America/Catamarca','America/Jujuy','America/Mendoza','America/La_Paz','America/Santiago','America/Punta_Arenas','Pacific/Easter','America/Bogota','America/Guayaquil','Pacific/Galapagos','America/Lima','America/Caracas','America/Montevideo','America/Asuncion','America/Mexico_City','America/Cancun','America/Merida','America/Monterrey','America/Matamoros','America/Chihuahua','America/Ciudad_Juarez','America/Ojinaga','America/Mazatlan','America/Hermosillo','America/Tijuana','America/Bahia_Banderas','America/Guatemala','America/El_Salvador','America/Tegucigalpa','America/Managua','America/Costa_Rica','America/Panama','America/Havana','America/Santo_Domingo'];
 try{var s=localStorage.getItem('lang');if(L.indexOf(s)>=0)pick=s}catch(e){}
@@ -37,7 +33,11 @@ if(!pick){var ls=(navigator.languages&&navigator.languages.length)?navigator.lan
 for(var i=0;i<ls.length&&!pick;i++){var p=String(ls[i]||'').toLowerCase().split('-')[0];if(L.indexOf(p)>=0)pick=p}}
 if(!pick){var z='';try{z=Intl.DateTimeFormat().resolvedOptions().timeZone||''}catch(e){}
 if(RU.indexOf(z)>=0)pick='ru';else if(ES.indexOf(z)>=0)pick='es'}
-location.replace('./'+(pick||'en')+'/');
+document.documentElement.className='go';location.replace('./'+(pick||'en')+'/');
 })();</script>
+</head>
+<body>
+<nav aria-label="Language"><a href="./ru/" hreflang="ru" lang="ru">Русский</a><a href="./en/" hreflang="en" lang="en">English</a><a href="./es/" hreflang="es" lang="es">Español</a></nav>
+<script>document.addEventListener('click',function(e){var a=e.target.closest&&e.target.closest('a[hreflang]');if(a){try{localStorage.setItem('lang',a.getAttribute('hreflang'))}catch(x){}}});</script>
 </body>
 </html>
